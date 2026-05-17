@@ -110,7 +110,9 @@ function setupSession(playerSession, trailerSession) {
     const headers = { ...details.responseHeaders };
     for (const key of Object.keys(headers)) {
       const lower = key.toLowerCase();
-      if (lower === "x-frame-options" || lower === "content-security-policy")
+      if ( lower === "x-frame-options" ||
+  lower === "content-security-policy" ||
+  lower === "permissions-policy")
         delete headers[key];
     }
     callback({ responseHeaders: headers });
@@ -120,7 +122,9 @@ function setupSession(playerSession, trailerSession) {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
   playerSession.setUserAgent(UA);
   trailerSession.setUserAgent(UA);
-
+  playerSession.setPermissionRequestHandler((webContents, permission, callback) => {
+  callback(true);
+});
   playerSession.webRequest.onHeadersReceived(
     { urls: ["*://*/*"] },
     stripHeaders,
@@ -222,6 +226,7 @@ function createWindow() {
       webviewTag: true,
       backgroundThrottling: true,
       spellcheck: false,
+      sandbox: false,
       // Caps the renderer's V8 heap + exposes gc() for manual GC hints after navigation
       additionalArguments: ["--js-flags=--max-old-space-size=256 --expose-gc"],
     },
